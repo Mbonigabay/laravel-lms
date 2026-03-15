@@ -19,7 +19,23 @@ A mini Learning Management System built with Laravel, featuring role-based acces
 - **Admin**: `admin@example.com` / `password123`
 - **Teacher**: `teacher@example.com` / `password123`
 - **Student**: `student@example.com` / `password123`
-
+ 
+## Project Architecture
+ 
+ This project follows a clean, modular architecture to ensure scalability and maintainability:
+ 
+ - **Controllers**: Handle HTTP requests, input validation, and return standardized responses using the `ApiResponse` trait.
+ - **Service Layer**: Contains all core business logic (e.g., `AuthService`, `CourseService`, `QuizService`).
+ - **DTOs (Data Transfer Objects)**: Encapsulate data passed between Controllers and Services, ensuring type safety and structured input/output.
+ - ** ApiResponse Trait**: Provides a consistent structure for all API responses:
+   ```json
+   {
+     "success": true,
+     "message": "...",
+     "data": { ... }
+   }
+   ```
+ 
 ## API Documentation (Swagger)
 
 The project includes OpenAPI (Swagger) documentation for all endpoints.
