@@ -27,12 +27,6 @@ A mini Learning Management System built with Laravel, featuring role-based acces
    ```
 3. Access the API at **[http://localhost:8080](http://localhost:8080)**.
  
-## Log Viewer
-
-A web-based log viewer is available to track application activity and model changes.
-- **URL**: `http://localhost:8080/logs`
-- **Features**: View structured logs, filter by level, and track model audit trails (Course, Quiz).
-
 ## Initial Seeded Users
 - **Admin**: `admin@example.com` / `password123`
 - **Teacher**: `teacher@example.com` / `password123`
@@ -43,17 +37,30 @@ A web-based log viewer is available to track application activity and model chan
  This project follows a clean, modular architecture to ensure scalability and maintainability:
  
  - **Controllers**: Handle HTTP requests, input validation, and return standardized responses using the `ApiResponse` trait.
- - **Service Layer**: Contains all core business logic (e.g., `AuthService`, `CourseService`, `QuizService`).
- - **DTOs (Data Transfer Objects)**: Encapsulate data passed between Controllers and Services, ensuring type safety and structured input/output.
- - ** ApiResponse Trait**: Provides a consistent structure for all API responses:
+ - **Service Layer**: Contains core business logic (e.g., `AuthService`, `CourseService`, `QuizService`).
+ - **DTOs (Data Transfer Objects)**: Encapsulate data passed between layers, ensuring type safety and structured IO.
+ - **ApiResponse Trait**: Provides a consistent structure for all API responses, including a `meta` object for trace IDs:
    ```json
    {
      "success": true,
      "message": "...",
-     "data": { ... }
+     "data": { ... },
+     "meta": {
+       "trace_id": "uuid-v4-trace-id"
+     }
    }
    ```
- 
+ - **Observability**: Implemented via **Trace IDs** generated for every request. These IDs correlate logs and responses, making debugging seamless.
+ - **Caching**: A robust caching layer using the `database` driver. Data like **Course listings** and **Analytical reports** are cached for 1 hour with automatic invalidation upon data changes (Create/Update/Delete/Enroll).
+
+## Log Viewer & Auditing
+
+A visual dashboard is available to monitor application activity and model changes in real-time.
+- **URL**: `http://localhost:8080/logs` (or `/logs` on your local server)
+- **Activity Logs**: Tracks every request, its method, IP, and associated **Trace ID**.
+- **Model Tracking**: Automatic audit trails for changes in **Course** and **Quiz** models.
+- **Error Correlation**: Exceptions in logs are tagged with the same Trace ID found in the API response meta.
+
 ## API Documentation (Swagger)
 
 The project includes OpenAPI (Swagger) documentation for all endpoints.
