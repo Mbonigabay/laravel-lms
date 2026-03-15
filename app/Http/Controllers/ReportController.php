@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\ReportService;
+use App\Traits\ApiResponse;
 
 class ReportController extends Controller
 {
+    use ApiResponse;
+
     protected $reportService;
 
     public function __construct(ReportService $reportService)
@@ -27,6 +30,6 @@ class ReportController extends Controller
      */
     public function coursesReport()
     {
-        return response()->json($this->reportService->getCoursesWithStudentCount());
+        return $this->successResponse($this->reportService->getCoursesWithStudentCount(), 'Course report retrieved successfully');
     }
 }

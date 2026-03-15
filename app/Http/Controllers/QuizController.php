@@ -7,9 +7,15 @@ use App\Models\Course;
 use App\Models\Question;
 use App\Models\Quiz;
 use App\Services\QuizService;
+use App\DTOs\Requests\CreateQuizRequestDTO;
+use App\DTOs\Requests\AddQuestionRequestDTO;
+use App\DTOs\Requests\SubmitQuizRequestDTO;
+use App\Traits\ApiResponse;
 
 class QuizController extends Controller
 {
+    use ApiResponse;
+
     protected $quizService;
 
     public function __construct(QuizService $quizService)
@@ -43,9 +49,10 @@ class QuizController extends Controller
             'title' => 'required|string|max:255',
         ]);
         
-        $quiz = $this->quizService->createQuiz($courseId, $validated);
+        $dto = CreateQuizRequestDTO::fromArray($validated);
+        $responseDto = $this->quizService->createQuiz($courseId, $dto);
         
-        return response()->json($quiz, 201);
+        return $this->successResponse($responseDto->toArray(), 'Quiz created successfully', 201);
     }
 
     /**
@@ -79,12 +86,13 @@ class QuizController extends Controller
         ]);
         
         if (!in_array($validated['answer'], $validated['options'])) {
-            return response()->json(['message' => 'Answer must be one of the options.'], 422);
+            return $this->errorResponse('Answer must be one of the options.', 422);
         }
         
-        $question = $this->quizService->addQuestion($quizId, $validated);
+        $dto = AddQuestionRequestDTO::fromArray($validated);
+        $responseDto = $this->quizService->addQuestion($quizId, $dto);
         
-        return response()->json($question, 201);
+        return $this->successResponse($responseDto->toArray(), 'Question added successfully', 201);
     }
 
     /**
@@ -112,13 +120,13 @@ class QuizController extends Controller
             'answers' => 'required|array',
         ]);
         
-        $result = $this->quizService->submitQuiz($request->user(), $quizId, $validated['answers']);
+        $dto = SubmitQuizRequestDTO::fromArray($validated);
+        $result = $this->quizService->submitQuiz($request->user(), $quizId, $dto);
         
-        return response()->json([
-            'message' => 'Quiz submitted successfully',
+        return $this->successResponse([
             'score' => $result['score'],
             'total' => $result['total'],
             'submission' => $result['submission']
-        ], 201);
+        ], 'Quiz submitted successfully', 201);
     }
 }

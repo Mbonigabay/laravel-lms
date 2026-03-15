@@ -4,41 +4,63 @@ namespace App\Services;
 
 use App\Models\Course;
 use App\Models\User;
+use App\DTOs\Requests\CreateCourseRequestDTO;
+use App\DTOs\Requests\UpdateCourseRequestDTO;
+use App\DTOs\Responses\CourseResponseDTO;
 
 class CourseService
 {
     /**
      * Get all courses.
+     * @return array
      */
-    public function getAllCourses()
+    public function getAllCourses(): array
     {
-        return Course::all();
+        $courses = Course::all();
+        return CourseResponseDTO::collection($courses);
     }
 
     /**
      * Create a new course.
+     * @param CreateCourseRequestDTO $dto
+     * @return CourseResponseDTO
      */
-    public function createCourse(array $data)
+    public function createCourse(CreateCourseRequestDTO $dto): CourseResponseDTO
     {
-        return Course::create($data);
+        $course = Course::create([
+            'title' => $dto->title,
+            'description' => $dto->description,
+        ]);
+        return new CourseResponseDTO($course);
     }
 
     /**
      * Get a course by ID.
+     * @param string $id
+     * @return CourseResponseDTO
      */
-    public function getCourseById(string $id)
+    public function getCourseById(string $id): CourseResponseDTO
     {
-        return Course::findOrFail($id);
+        $course = Course::findOrFail($id);
+        return new CourseResponseDTO($course);
     }
 
     /**
      * Update an existing course.
+     * @param string $id
+     * @param UpdateCourseRequestDTO $dto
+     * @return CourseResponseDTO
      */
-    public function updateCourse(string $id, array $data)
+    public function updateCourse(string $id, UpdateCourseRequestDTO $dto): CourseResponseDTO
     {
         $course = Course::findOrFail($id);
-        $course->update($data);
-        return $course;
+        
+        $updateData = $dto->getUpdateData();
+        if (!empty($updateData)) {
+            $course->update($updateData);
+        }
+
+        return new CourseResponseDTO($course);
     }
 
     /**

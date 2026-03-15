@@ -5,31 +5,44 @@ namespace App\Services;
 use App\Models\Course;
 use App\Models\Quiz;
 use App\Models\User;
+use App\DTOs\Requests\CreateQuizRequestDTO;
+use App\DTOs\Requests\AddQuestionRequestDTO;
+use App\DTOs\Requests\SubmitQuizRequestDTO;
+use App\DTOs\Responses\QuizResponseDTO;
+use App\DTOs\Responses\QuestionResponseDTO;
 
 class QuizService
 {
     /**
      * Create a new quiz for a course.
      */
-    public function createQuiz(string $courseId, array $data)
+    public function createQuiz(string $courseId, CreateQuizRequestDTO $dto): QuizResponseDTO
     {
         $course = Course::findOrFail($courseId);
-        return $course->quizzes()->create($data);
+        $quiz = $course->quizzes()->create([
+            'title' => $dto->title,
+        ]);
+        return new QuizResponseDTO($quiz);
     }
 
     /**
      * Add a question to a quiz.
      */
-    public function addQuestion(string $quizId, array $data)
+    public function addQuestion(string $quizId, AddQuestionRequestDTO $dto): QuestionResponseDTO
     {
         $quiz = Quiz::findOrFail($quizId);
-        return $quiz->questions()->create($data);
+        $question = $quiz->questions()->create([
+            'question' => $dto->question,
+            'options' => $dto->options,
+            'answer' => $dto->answer,
+        ]);
+        return new QuestionResponseDTO($question);
     }
 
     /**
      * Submit a quiz and calculate the score.
      */
-    public function submitQuiz(User $user, string $quizId, array $answers)
+    public function submitQuiz(User $user, string $quizId, SubmitQuizRequestDTO $dto)
     {
         $quiz = Quiz::with('questions')->findOrFail($quizId);
         
@@ -37,7 +50,7 @@ class QuizService
         $totalQuestions = $quiz->questions->count();
         
         foreach ($quiz->questions as $question) {
-            $submittedAnswer = $answers[$question->id] ?? null;
+            $submittedAnswer = $dto->answers[$question->id] ?? null;
             if ($submittedAnswer === $question->answer) {
                 $score++;
             }

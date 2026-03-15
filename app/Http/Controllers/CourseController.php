@@ -6,9 +6,14 @@ use Illuminate\Http\Request;
 
 use App\Models\Course;
 use App\Services\CourseService;
+use App\DTOs\Requests\CreateCourseRequestDTO;
+use App\DTOs\Requests\UpdateCourseRequestDTO;
+use App\Traits\ApiResponse;
 
 class CourseController extends Controller
 {
+    use ApiResponse;
+
     protected $courseService;
 
     public function __construct(CourseService $courseService)
@@ -28,7 +33,7 @@ class CourseController extends Controller
      */
     public function index()
     {
-        return response()->json($this->courseService->getAllCourses());
+        return $this->successResponse($this->courseService->getAllCourses(), 'Courses retrieved successfully');
     }
 
     /**
@@ -57,8 +62,10 @@ class CourseController extends Controller
             'description' => 'nullable|string',
         ]);
         
-        $course = $this->courseService->createCourse($validated);
-        return response()->json($course, 201);
+        $dto = CreateCourseRequestDTO::fromArray($validated);
+        $responseDto = $this->courseService->createCourse($dto);
+        
+        return $this->successResponse($responseDto->toArray(), 'Course created successfully', 201);
     }
 
     /**
@@ -75,8 +82,8 @@ class CourseController extends Controller
      */
     public function show(string $id)
     {
-        $course = $this->courseService->getCourseById($id);
-        return response()->json($course);
+        $responseDto = $this->courseService->getCourseById($id);
+        return $this->successResponse($responseDto->toArray(), 'Course retrieved successfully');
     }
 
     /**
@@ -105,8 +112,10 @@ class CourseController extends Controller
             'description' => 'nullable|string',
         ]);
         
-        $course = $this->courseService->updateCourse($id, $validated);
-        return response()->json($course);
+        $dto = UpdateCourseRequestDTO::fromArray($validated);
+        $responseDto = $this->courseService->updateCourse($id, $dto);
+        
+        return $this->successResponse($responseDto->toArray(), 'Course updated successfully');
     }
 
     /**
@@ -124,7 +133,7 @@ class CourseController extends Controller
     public function destroy(string $id)
     {
         $this->courseService->deleteCourse($id);
-        return response()->json(null, 204);
+        return $this->successResponse(null, 'Course deleted successfully');
     }
 
     /**
@@ -145,10 +154,10 @@ class CourseController extends Controller
         $success = $this->courseService->enrollUser($request->user(), $id);
 
         if (!$success) {
-            return response()->json(['message' => 'Already enrolled'], 400);
+            return $this->errorResponse('Already enrolled', 400);
         }
 
-        return response()->json(['message' => 'Successfully enrolled in course.'], 200);
+        return $this->successResponse(null, 'Successfully enrolled in course.');
     }
 
     /**
@@ -163,7 +172,7 @@ class CourseController extends Controller
      */
     public function enrolledCourses(Request $request)
     {
-        return response()->json($this->courseService->getEnrolledCourses($request->user()));
+        return $this->successResponse($this->courseService->getEnrolledCourses($request->user()), 'Enrolled courses retrieved successfully');
     }
 
     /**
@@ -180,6 +189,6 @@ class CourseController extends Controller
      */
     public function students(string $id)
     {
-        return response()->json($this->courseService->getCourseStudents($id));
+        return $this->successResponse($this->courseService->getCourseStudents($id), 'Students retrieved successfully');
     }
 }

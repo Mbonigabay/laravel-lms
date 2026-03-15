@@ -3,14 +3,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use App\Services\AuthService;
+use App\DTOs\Requests\RegisterRequestDTO;
+use App\DTOs\Requests\LoginRequestDTO;
+use App\DTOs\Responses\AuthResponseDTO;
+use App\Traits\ApiResponse;
 
 class AuthController extends Controller
 {
+    use ApiResponse;
+
     protected $authService;
 
     public function __construct(AuthService $authService)
@@ -54,13 +59,13 @@ class AuthController extends Controller
             'role' => 'nullable|in:student,teacher,admin',
         ]);
 
-        $user = $this->authService->register($validated);
+        $dto = RegisterRequestDTO::fromArray($validated);
+        $user = $this->authService->register($dto);
         $token = $user->createToken('auth_token')->plainTextToken;
+        
+        $responseDto = new AuthResponseDTO($user, $token);
 
-        return response()->json([
-            'user' => $user,
-            'token' => $token,
-        ], 201);
+        return $this->successResponse($responseDto->toArray(), 'User registered successfully', 201);
     }
 
     /**
@@ -95,12 +100,11 @@ class AuthController extends Controller
         ]);
 
         try {
-            $data = $this->authService->login($validated);
-            return response()->json($data);
+            $dto = LoginRequestDTO::fromArray($validated);
+            $responseDto = $this->authService->login($dto);
+            return $this->successResponse($responseDto->toArray(), 'Login successful');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'message' => $e->getMessage()
-            ], 401);
+            return $this->errorResponse($e->getMessage(), 401);
         }
     }
 
@@ -125,8 +129,6 @@ class AuthController extends Controller
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json([
-            'message' => 'Successfully logged out'
-        ]);
+        return $this->successResponse(null, 'Successfully logged out');
     }
 }

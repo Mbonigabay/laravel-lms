@@ -5,37 +5,40 @@ namespace App\Services;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use App\DTOs\Requests\RegisterRequestDTO;
+use App\DTOs\Requests\LoginRequestDTO;
+use App\DTOs\Responses\AuthResponseDTO;
 
 class AuthService
 {
     /**
      * Register a new user and return user instance.
      *
-     * @param array $data
+     * @param RegisterRequestDTO $dto
      * @return User
      */
-    public function register(array $data): User
+    public function register(RegisterRequestDTO $dto): User
     {
         return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-            'role' => $data['role'] ?? 'student',
+            'name' => $dto->name,
+            'email' => $dto->email,
+            'password' => Hash::make($dto->password),
+            'role' => $dto->role ?? 'student',
         ]);
     }
 
     /**
      * Authenticate a user and create token.
      *
-     * @param array $credentials
-     * @return array
+     * @param LoginRequestDTO $dto
+     * @return AuthResponseDTO
      * @throws ValidationException
      */
-    public function login(array $credentials): array
+    public function login(LoginRequestDTO $dto): AuthResponseDTO
     {
-        $user = User::where('email', $credentials['email'])->first();
+        $user = User::where('email', $dto->email)->first();
 
-        if (!$user || !Hash::check($credentials['password'], $user->password)) {
+        if (!$user || !Hash::check($dto->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
@@ -43,9 +46,6 @@ class AuthService
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return [
-            'user' => $user,
-            'token' => $token
-        ];
+        return new AuthResponseDTO($user, $token);
     }
 }
