@@ -11,6 +11,9 @@ use App\DTOs\Requests\CreateQuizRequestDTO;
 use App\DTOs\Requests\AddQuestionRequestDTO;
 use App\DTOs\Requests\SubmitQuizRequestDTO;
 use App\Traits\ApiResponse;
+use App\Http\Requests\Quiz\CreateQuizRequest;
+use App\Http\Requests\Quiz\AddQuestionRequest;
+use App\Http\Requests\Quiz\SubmitQuizRequest;
 
 class QuizController extends Controller
 {
@@ -43,13 +46,9 @@ class QuizController extends Controller
      *      @OA\Response(response=404, description="Not found")
      * )
      */
-    public function storeQuiz(Request $request, string $courseId)
+    public function storeQuiz(CreateQuizRequest $request, string $courseId)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-        ]);
-        
-        $dto = CreateQuizRequestDTO::fromArray($validated);
+        $dto = CreateQuizRequestDTO::fromArray($request->validated());
         $responseDto = $this->quizService->createQuiz($courseId, $dto);
         
         return $this->successResponse($responseDto->toArray(), 'Quiz created successfully', 201);
@@ -77,13 +76,9 @@ class QuizController extends Controller
      *      @OA\Response(response=404, description="Not found")
      * )
      */
-    public function storeQuestion(Request $request, string $quizId)
+    public function storeQuestion(AddQuestionRequest $request, string $quizId)
     {
-        $validated = $request->validate([
-            'question' => 'required|string',
-            'options' => 'required|array|min:2',
-            'answer' => 'required|string',
-        ]);
+        $validated = $request->validated();
         
         if (!in_array($validated['answer'], $validated['options'])) {
             return $this->errorResponse('Answer must be one of the options.', 422);
@@ -114,13 +109,9 @@ class QuizController extends Controller
      *      @OA\Response(response=404, description="Not found")
      * )
      */
-    public function submitQuiz(Request $request, string $quizId)
+    public function submitQuiz(SubmitQuizRequest $request, string $quizId)
     {
-        $validated = $request->validate([
-            'answers' => 'required|array',
-        ]);
-        
-        $dto = SubmitQuizRequestDTO::fromArray($validated);
+        $dto = SubmitQuizRequestDTO::fromArray($request->validated());
         $result = $this->quizService->submitQuiz($request->user(), $quizId, $dto);
         
         return $this->successResponse([

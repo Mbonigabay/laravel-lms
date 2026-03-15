@@ -81,7 +81,7 @@ class CourseService
         $course = Course::findOrFail($courseId);
 
         if ($user->enrollments()->where('course_id', $course->id)->exists()) {
-            return false;
+            throw new \App\Exceptions\ApiException('You are already enrolled in this course.', 400);
         }
 
         $user->enrollments()->create(['course_id' => $course->id]);

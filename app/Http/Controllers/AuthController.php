@@ -11,6 +11,8 @@ use App\DTOs\Requests\RegisterRequestDTO;
 use App\DTOs\Requests\LoginRequestDTO;
 use App\DTOs\Responses\AuthResponseDTO;
 use App\Traits\ApiResponse;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\LoginRequest;
 
 class AuthController extends Controller
 {
@@ -50,16 +52,9 @@ class AuthController extends Controller
      *      )
      * )
      */
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'role' => 'nullable|in:student,teacher,admin',
-        ]);
-
-        $dto = RegisterRequestDTO::fromArray($validated);
+        $dto = RegisterRequestDTO::fromArray($request->validated());
         $user = $this->authService->register($dto);
         $token = $user->createToken('auth_token')->plainTextToken;
         
@@ -92,20 +87,11 @@ class AuthController extends Controller
      *      )
      * )
      */
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $validated = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
-        try {
-            $dto = LoginRequestDTO::fromArray($validated);
-            $responseDto = $this->authService->login($dto);
-            return $this->successResponse($responseDto->toArray(), 'Login successful');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->errorResponse($e->getMessage(), 401);
-        }
+        $dto = LoginRequestDTO::fromArray($request->validated());
+        $responseDto = $this->authService->login($dto);
+        return $this->successResponse($responseDto->toArray(), 'Login successful');
     }
 
     /**

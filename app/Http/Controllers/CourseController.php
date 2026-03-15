@@ -9,6 +9,8 @@ use App\Services\CourseService;
 use App\DTOs\Requests\CreateCourseRequestDTO;
 use App\DTOs\Requests\UpdateCourseRequestDTO;
 use App\Traits\ApiResponse;
+use App\Http\Requests\Course\CreateCourseRequest;
+use App\Http\Requests\Course\UpdateCourseRequest;
 
 class CourseController extends Controller
 {
@@ -55,14 +57,9 @@ class CourseController extends Controller
      *      @OA\Response(response=403, description="Forbidden")
      * )
      */
-    public function store(Request $request)
+    public function store(CreateCourseRequest $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-        ]);
-        
-        $dto = CreateCourseRequestDTO::fromArray($validated);
+        $dto = CreateCourseRequestDTO::fromArray($request->validated());
         $responseDto = $this->courseService->createCourse($dto);
         
         return $this->successResponse($responseDto->toArray(), 'Course created successfully', 201);
@@ -105,14 +102,9 @@ class CourseController extends Controller
      *      @OA\Response(response=404, description="Not found")
      * )
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateCourseRequest $request, string $id)
     {
-        $validated = $request->validate([
-            'title' => 'sometimes|required|string|max:255',
-            'description' => 'nullable|string',
-        ]);
-        
-        $dto = UpdateCourseRequestDTO::fromArray($validated);
+        $dto = UpdateCourseRequestDTO::fromArray($request->validated());
         $responseDto = $this->courseService->updateCourse($id, $dto);
         
         return $this->successResponse($responseDto->toArray(), 'Course updated successfully');
@@ -151,12 +143,7 @@ class CourseController extends Controller
      */
     public function enroll(Request $request, string $id)
     {
-        $success = $this->courseService->enrollUser($request->user(), $id);
-
-        if (!$success) {
-            return $this->errorResponse('Already enrolled', 400);
-        }
-
+        $this->courseService->enrollUser($request->user(), $id);
         return $this->successResponse(null, 'Successfully enrolled in course.');
     }
 

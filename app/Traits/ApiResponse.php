@@ -28,14 +28,15 @@ trait ApiResponse
      *
      * @param  string  $message
      * @param  int  $code
+     * @param  mixed  $data
      * @return JsonResponse
      */
-    protected function errorResponse(string $message, int $code): JsonResponse
+    protected function errorResponse(string $message, int $code = 400, $data = null): JsonResponse
     {
         return response()->json([
             'success' => false,
             'message' => $message,
-            'data' => null,
+            'data' => $data,
         ], $code);
     }
 }
