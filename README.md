@@ -14,6 +14,18 @@ A mini Learning Management System built with Laravel, featuring role-based acces
    ```bash
    php artisan serve
    ```
+ 
+## Docker Setup
+
+1. Build and start the containers:
+   ```bash
+   docker-compose up -d --build
+   ```
+2. Run migrations and seed the database inside the container:
+   ```bash
+   docker-compose exec app php artisan migrate --seed
+   ```
+3. Access the API at **[http://localhost:8080](http://localhost:8080)**.
 
 ## Initial Seeded Users
 - **Admin**: `admin@example.com` / `password123`
