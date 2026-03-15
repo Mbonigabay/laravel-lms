@@ -5,9 +5,17 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Models\Course;
+use App\Services\CourseService;
 
 class CourseController extends Controller
 {
+    protected $courseService;
+
+    public function __construct(CourseService $courseService)
+    {
+        $this->courseService = $courseService;
+    }
+
     /**
      * @OA\Get(
      *      path="/api/courses",
@@ -20,7 +28,7 @@ class CourseController extends Controller
      */
     public function index()
     {
-        return response()->json(Course::all());
+        return response()->json($this->courseService->getAllCourses());
     }
 
     /**
@@ -49,7 +57,7 @@ class CourseController extends Controller
             'description' => 'nullable|string',
         ]);
         
-        $course = Course::create($validated);
+        $course = $this->courseService->createCourse($validated);
         return response()->json($course, 201);
     }
 
@@ -67,7 +75,7 @@ class CourseController extends Controller
      */
     public function show(string $id)
     {
-        $course = Course::findOrFail($id);
+        $course = $this->courseService->getCourseById($id);
         return response()->json($course);
     }
 
@@ -92,13 +100,12 @@ class CourseController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $course = Course::findOrFail($id);
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
         ]);
         
-        $course->update($validated);
+        $course = $this->courseService->updateCourse($id, $validated);
         return response()->json($course);
     }
 
@@ -116,8 +123,7 @@ class CourseController extends Controller
      */
     public function destroy(string $id)
     {
-        $course = Course::findOrFail($id);
-        $course->delete();
+        $this->courseService->deleteCourse($id);
         return response()->json(null, 204);
     }
 
@@ -136,14 +142,12 @@ class CourseController extends Controller
      */
     public function enroll(Request $request, string $id)
     {
-        $course = Course::findOrFail($id);
-        $user = $request->user();
+        $success = $this->courseService->enrollUser($request->user(), $id);
 
-        if ($user->enrollments()->where('course_id', $course->id)->exists()) {
+        if (!$success) {
             return response()->json(['message' => 'Already enrolled'], 400);
         }
 
-        $user->enrollments()->create(['course_id' => $course->id]);
         return response()->json(['message' => 'Successfully enrolled in course.'], 200);
     }
 
@@ -159,7 +163,7 @@ class CourseController extends Controller
      */
     public function enrolledCourses(Request $request)
     {
-        return response()->json($request->user()->enrolledCourses);
+        return response()->json($this->courseService->getEnrolledCourses($request->user()));
     }
 
     /**
@@ -176,7 +180,6 @@ class CourseController extends Controller
      */
     public function students(string $id)
     {
-        $course = Course::findOrFail($id);
-        return response()->json($course->students);
+        return response()->json($this->courseService->getCourseStudents($id));
     }
 }

@@ -3,11 +3,17 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
-use App\Models\Course;
+use App\Services\ReportService;
 
 class ReportController extends Controller
 {
+    protected $reportService;
+
+    public function __construct(ReportService $reportService)
+    {
+        $this->reportService = $reportService;
+    }
+
     /**
      * @OA\Get(
      *      path="/api/reports/courses",
@@ -21,7 +27,6 @@ class ReportController extends Controller
      */
     public function coursesReport()
     {
-        $courses = Course::withCount('students')->get();
-        return response()->json($courses);
+        return response()->json($this->reportService->getCoursesWithStudentCount());
     }
 }
