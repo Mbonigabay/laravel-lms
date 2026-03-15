@@ -1,8 +1,15 @@
 <?php
 
+use App\Exceptions\ApiException;
+use App\Http\Middleware\RoleMiddleware;
+use App\Http\Middleware\TraceIdMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -12,17 +19,17 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->append(\App\Http\Middleware\TraceIdMiddleware::class);
+        $middleware->append(TraceIdMiddleware::class);
         $middleware->alias([
-            'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'role' => RoleMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (\Illuminate\Validation\ValidationException $e, $request) {
+        $exceptions->render(function (ValidationException $e, $request) {
             if ($request->is('api/*')) {
-                \Illuminate\Support\Facades\Log::info('Validation failed', [
+                Log::info('Validation failed', [
                     'errors' => $e->errors(),
-                    'trace_id' => $request->attributes->get('trace_id')
+                    'trace_id' => $request->attributes->get('trace_id'),
                 ]);
 
                 return response()->json([
@@ -36,10 +43,10 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        $exceptions->render(function (\App\Exceptions\ApiException $e, $request) {
+        $exceptions->render(function (ApiException $e, $request) {
             if ($request->is('api/*')) {
-                \Illuminate\Support\Facades\Log::warning('API Exception: ' . $e->getMessage(), [
-                    'trace_id' => $request->attributes->get('trace_id')
+                Log::warning('API Exception: '.$e->getMessage(), [
+                    'trace_id' => $request->attributes->get('trace_id'),
                 ]);
 
                 return response()->json([
@@ -53,7 +60,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e, $request) {
+        $exceptions->render(function (NotFoundHttpException $e, $request) {
             if ($request->is('api/*')) {
                 return response()->json([
                     'success' => false,
@@ -66,7 +73,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e, $request) {
+        $exceptions->render(function (AccessDeniedHttpException $e, $request) {
             if ($request->is('api/*')) {
                 return response()->json([
                     'success' => false,
@@ -80,9 +87,9 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->reportable(function (Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('Unhandled exception: ' . $e->getMessage(), [
+            Log::error('Unhandled exception: '.$e->getMessage(), [
                 'exception' => $e,
-                'trace_id' => request()->attributes->get('trace_id')
+                'trace_id' => request()->attributes->get('trace_id'),
             ]);
         });
     })->create();

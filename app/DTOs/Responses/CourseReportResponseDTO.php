@@ -7,7 +7,9 @@ use App\Models\Course;
 class CourseReportResponseDTO
 {
     public int $id;
+
     public string $title;
+
     public int $students_count;
 
     public function __construct(Course $course)

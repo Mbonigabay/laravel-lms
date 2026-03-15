@@ -5,8 +5,11 @@ namespace App\DTOs\Requests;
 class RegisterRequestDTO
 {
     public string $name;
+
     public string $email;
+
     public string $password;
+
     public ?string $role;
 
     public function __construct(string $name, string $email, string $password, ?string $role = null)

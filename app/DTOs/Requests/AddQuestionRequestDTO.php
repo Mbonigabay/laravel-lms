@@ -5,7 +5,9 @@ namespace App\DTOs\Requests;
 class AddQuestionRequestDTO
 {
     public string $question;
+
     public array $options;
+
     public string $answer;
 
     public function __construct(string $question, array $options, string $answer)

@@ -5,6 +5,7 @@ namespace App\DTOs\Requests;
 class CreateCourseRequestDTO
 {
     public string $title;
+
     public ?string $description;
 
     public function __construct(string $title, ?string $description = null)

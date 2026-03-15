@@ -7,6 +7,7 @@ use App\Models\Quiz;
 class QuizResponseDTO
 {
     public int $id;
+
     public string $title;
 
     public function __construct(Quiz $quiz)

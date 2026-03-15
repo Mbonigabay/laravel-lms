@@ -2,35 +2,36 @@
 
 namespace App\Services;
 
-use App\Models\Course;
-use App\Models\User;
 use App\DTOs\Requests\CreateCourseRequestDTO;
 use App\DTOs\Requests\UpdateCourseRequestDTO;
 use App\DTOs\Responses\CourseResponseDTO;
+use App\Exceptions\ApiException;
+use App\Models\Course;
+use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 
 class CourseService
 {
     private const CACHE_KEY_ALL = 'courses:all';
+
     private const CACHE_KEY_PREFIX = 'course:';
+
     private const CACHE_TTL = 3600; // 1 hour
 
     /**
      * Get all courses.
-     * @return array
      */
     public function getAllCourses(): array
     {
         return Cache::remember(self::CACHE_KEY_ALL, self::CACHE_TTL, function () {
             $courses = Course::all();
+
             return CourseResponseDTO::collection($courses);
         });
     }
 
     /**
      * Create a new course.
-     * @param CreateCourseRequestDTO $dto
-     * @return CourseResponseDTO
      */
     public function createCourse(CreateCourseRequestDTO $dto): CourseResponseDTO
     {
@@ -46,29 +47,25 @@ class CourseService
 
     /**
      * Get a course by ID.
-     * @param string $id
-     * @return CourseResponseDTO
      */
     public function getCourseById(string $id): CourseResponseDTO
     {
-        return Cache::remember(self::CACHE_KEY_PREFIX . $id, self::CACHE_TTL, function () use ($id) {
+        return Cache::remember(self::CACHE_KEY_PREFIX.$id, self::CACHE_TTL, function () use ($id) {
             $course = Course::findOrFail($id);
+
             return new CourseResponseDTO($course);
         });
     }
 
     /**
      * Update an existing course.
-     * @param string $id
-     * @param UpdateCourseRequestDTO $dto
-     * @return CourseResponseDTO
      */
     public function updateCourse(string $id, UpdateCourseRequestDTO $dto): CourseResponseDTO
     {
         $course = Course::findOrFail($id);
-        
+
         $updateData = $dto->getUpdateData();
-        if (!empty($updateData)) {
+        if (! empty($updateData)) {
             $course->update($updateData);
             $this->clearCourseCache($id);
         }
@@ -83,7 +80,7 @@ class CourseService
     {
         $course = Course::findOrFail($id);
         $course->delete();
-        
+
         $this->clearCourseCache($id);
         Cache::forget('reports:student_counts');
 
@@ -98,11 +95,11 @@ class CourseService
         $course = Course::findOrFail($courseId);
 
         if ($user->enrollments()->where('course_id', $course->id)->exists()) {
-            throw new \App\Exceptions\ApiException('You are already enrolled in this course.', 400);
+            throw new ApiException('You are already enrolled in this course.', 400);
         }
 
         $user->enrollments()->create(['course_id' => $course->id]);
-        
+
         // Invalidate report cache as student count changed
         Cache::forget('reports:student_counts');
 
@@ -123,6 +120,7 @@ class CourseService
     public function getCourseStudents(string $courseId)
     {
         $course = Course::findOrFail($courseId);
+
         return $course->students;
     }
 
@@ -133,7 +131,7 @@ class CourseService
     {
         Cache::forget(self::CACHE_KEY_ALL);
         if ($id) {
-            Cache::forget(self::CACHE_KEY_PREFIX . $id);
+            Cache::forget(self::CACHE_KEY_PREFIX.$id);
         }
         // Reports depend on course data/counts
         Cache::forget('reports:student_counts');

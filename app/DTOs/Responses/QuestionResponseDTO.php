@@ -7,7 +7,9 @@ use App\Models\Question;
 class QuestionResponseDTO
 {
     public int $id;
+
     public string $question;
+
     public array $options;
 
     public function __construct(Question $question)

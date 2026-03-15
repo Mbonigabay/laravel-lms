@@ -2,17 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
-use App\Services\AuthService;
-use App\DTOs\Requests\RegisterRequestDTO;
 use App\DTOs\Requests\LoginRequestDTO;
+use App\DTOs\Requests\RegisterRequestDTO;
 use App\DTOs\Responses\AuthResponseDTO;
-use App\Traits\ApiResponse;
-use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Models\User;
+use App\Services\AuthService;
+use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
@@ -31,10 +29,13 @@ class AuthController extends Controller
      *      operationId="registerUser",
      *      tags={"Authentication"},
      *      summary="Register a new user",
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(
      *              required={"name","email","password","password_confirmation"},
+     *
      *              @OA\Property(property="name", type="string", example="John Doe"),
      *              @OA\Property(property="email", type="string", format="email", example="user@example.com"),
      *              @OA\Property(property="password", type="string", format="password", example="password123"),
@@ -42,6 +43,7 @@ class AuthController extends Controller
      *              @OA\Property(property="role", type="string", enum={"student","teacher","admin"}, example="student")
      *          )
      *      ),
+     *
      *      @OA\Response(
      *          response=201,
      *          description="Successful operation",
@@ -57,7 +59,7 @@ class AuthController extends Controller
         $dto = RegisterRequestDTO::fromArray($request->validated());
         $user = $this->authService->register($dto);
         $token = $user->createToken('auth_token')->plainTextToken;
-        
+
         $responseDto = new AuthResponseDTO($user, $token);
 
         return $this->successResponse($responseDto->toArray(), 'User registered successfully', 201);
@@ -69,14 +71,18 @@ class AuthController extends Controller
      *      operationId="loginUser",
      *      tags={"Authentication"},
      *      summary="Login user",
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(
      *              required={"email","password"},
+     *
      *              @OA\Property(property="email", type="string", format="email", example="admin@example.com"),
      *              @OA\Property(property="password", type="string", format="password", example="password123")
      *          )
      *      ),
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation"
@@ -91,6 +97,7 @@ class AuthController extends Controller
     {
         $dto = LoginRequestDTO::fromArray($request->validated());
         $responseDto = $this->authService->login($dto);
+
         return $this->successResponse($responseDto->toArray(), 'Login successful');
     }
 
@@ -101,6 +108,7 @@ class AuthController extends Controller
      *      tags={"Authentication"},
      *      summary="Logout user",
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Response(
      *          response=200,
      *          description="Successful operation"

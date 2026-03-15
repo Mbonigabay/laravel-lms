@@ -5,6 +5,7 @@ namespace App\DTOs\Requests;
 class UpdateCourseRequestDTO
 {
     public ?string $title;
+
     public ?string $description;
 
     public function __construct(?string $title = null, ?string $description = null)
@@ -23,8 +24,6 @@ class UpdateCourseRequestDTO
 
     /**
      * Get only the provided fields to update.
-     *
-     * @return array
      */
     public function getUpdateData(): array
     {
@@ -35,6 +34,7 @@ class UpdateCourseRequestDTO
         if ($this->description !== null) {
             $data['description'] = $this->description;
         }
+
         return $data;
     }
 }

@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
-use App\Models\Course;
-use App\Services\CourseService;
 use App\DTOs\Requests\CreateCourseRequestDTO;
 use App\DTOs\Requests\UpdateCourseRequestDTO;
-use App\Traits\ApiResponse;
 use App\Http\Requests\Course\CreateCourseRequest;
 use App\Http\Requests\Course\UpdateCourseRequest;
+use App\Models\Course;
+use App\Services\CourseService;
+use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
@@ -30,6 +29,7 @@ class CourseController extends Controller
      *      tags={"Courses"},
      *      summary="Get list of all courses",
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Response(response=200, description="Successful operation")
      * )
      */
@@ -45,14 +45,18 @@ class CourseController extends Controller
      *      tags={"Courses"},
      *      summary="Create a new course (Admin only)",
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(
      *              required={"title"},
+     *
      *              @OA\Property(property="title", type="string", example="Advanced Laravel"),
      *              @OA\Property(property="description", type="string", example="Deep dive into internals.")
      *          )
      *      ),
+     *
      *      @OA\Response(response=201, description="Successful operation"),
      *      @OA\Response(response=403, description="Forbidden")
      * )
@@ -61,7 +65,7 @@ class CourseController extends Controller
     {
         $dto = CreateCourseRequestDTO::fromArray($request->validated());
         $responseDto = $this->courseService->createCourse($dto);
-        
+
         return $this->successResponse($responseDto->toArray(), 'Course created successfully', 201);
     }
 
@@ -72,7 +76,9 @@ class CourseController extends Controller
      *      tags={"Courses"},
      *      summary="Get course details",
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Parameter(name="id", description="Course ID", required=true, in="path", @OA\Schema(type="integer")),
+     *
      *      @OA\Response(response=200, description="Successful operation"),
      *      @OA\Response(response=404, description="Not found")
      * )
@@ -80,6 +86,7 @@ class CourseController extends Controller
     public function show(string $id)
     {
         $responseDto = $this->courseService->getCourseById($id);
+
         return $this->successResponse($responseDto->toArray(), 'Course retrieved successfully');
     }
 
@@ -90,14 +97,19 @@ class CourseController extends Controller
      *      tags={"Courses"},
      *      summary="Update existing course (Admin only)",
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Parameter(name="id", description="Course ID", required=true, in="path", @OA\Schema(type="integer")),
+     *
      *      @OA\RequestBody(
      *          required=true,
+     *
      *          @OA\JsonContent(
+     *
      *              @OA\Property(property="title", type="string", example="Updated Title"),
      *              @OA\Property(property="description", type="string", example="Updated Description")
      *          )
      *      ),
+     *
      *      @OA\Response(response=200, description="Successful operation"),
      *      @OA\Response(response=404, description="Not found")
      * )
@@ -106,7 +118,7 @@ class CourseController extends Controller
     {
         $dto = UpdateCourseRequestDTO::fromArray($request->validated());
         $responseDto = $this->courseService->updateCourse($id, $dto);
-        
+
         return $this->successResponse($responseDto->toArray(), 'Course updated successfully');
     }
 
@@ -117,7 +129,9 @@ class CourseController extends Controller
      *      tags={"Courses"},
      *      summary="Delete a course (Admin only)",
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Parameter(name="id", description="Course ID", required=true, in="path", @OA\Schema(type="integer")),
+     *
      *      @OA\Response(response=204, description="Successful operation"),
      *      @OA\Response(response=404, description="Not found")
      * )
@@ -125,6 +139,7 @@ class CourseController extends Controller
     public function destroy(string $id)
     {
         $this->courseService->deleteCourse($id);
+
         return $this->successResponse(null, 'Course deleted successfully');
     }
 
@@ -135,7 +150,9 @@ class CourseController extends Controller
      *      tags={"Courses"},
      *      summary="Enroll in a course (Student only)",
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Parameter(name="id", description="Course ID", required=true, in="path", @OA\Schema(type="integer")),
+     *
      *      @OA\Response(response=200, description="Successfully enrolled"),
      *      @OA\Response(response=400, description="Already enrolled"),
      *      @OA\Response(response=404, description="Not found")
@@ -144,6 +161,7 @@ class CourseController extends Controller
     public function enroll(Request $request, string $id)
     {
         $this->courseService->enrollUser($request->user(), $id);
+
         return $this->successResponse(null, 'Successfully enrolled in course.');
     }
 
@@ -154,6 +172,7 @@ class CourseController extends Controller
      *      tags={"Courses"},
      *      summary="Get list of enrolled courses for the logged-in student",
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Response(response=200, description="Successful operation")
      * )
      */
@@ -169,7 +188,9 @@ class CourseController extends Controller
      *      tags={"Courses"},
      *      summary="Get list of students enrolled in the course (Teacher only)",
      *      security={{"bearerAuth":{}}},
+     *
      *      @OA\Parameter(name="id", description="Course ID", required=true, in="path", @OA\Schema(type="integer")),
+     *
      *      @OA\Response(response=200, description="Successful operation"),
      *      @OA\Response(response=404, description="Not found")
      * )

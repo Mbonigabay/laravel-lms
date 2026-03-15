@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Course;
+use App\Models\Enrollment;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -33,11 +35,11 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('password123'),
         ]);
 
-        $course = \App\Models\Course::firstOrCreate(['title' => 'Laravel APIs'], [
-            'description' => 'Learn how to build APIs in Laravel.'
+        $course = Course::firstOrCreate(['title' => 'Laravel APIs'], [
+            'description' => 'Learn how to build APIs in Laravel.',
         ]);
 
-        \App\Models\Enrollment::firstOrCreate([
+        Enrollment::firstOrCreate([
             'user_id' => $student->id,
             'course_id' => $course->id,
         ]);

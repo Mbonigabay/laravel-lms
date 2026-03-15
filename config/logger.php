@@ -74,5 +74,5 @@ return [
          * Key for a dark theme in the session
          */
         'key' => 'lte_theme',
-    ]
+    ],
 ];

@@ -14,7 +14,7 @@ class TraceIdMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -26,14 +26,14 @@ class TraceIdMiddleware
 
         // Add to log context
         Log::withContext([
-            'trace_id' => $traceId
+            'trace_id' => $traceId,
         ]);
 
         // Log request start using Llog for dashboard visibility
-        Llog::info('Request started: ' . $request->method() . ' ' . $request->fullUrl(), [
+        Llog::info('Request started: '.$request->method().' '.$request->fullUrl(), [
             'ip' => $request->ip(),
             'user_agent' => $request->userAgent(),
-            'trace_id' => $traceId
+            'trace_id' => $traceId,
         ]);
 
         $response = $next($request);

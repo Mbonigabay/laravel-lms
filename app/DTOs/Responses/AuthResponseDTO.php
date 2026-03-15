@@ -7,6 +7,7 @@ use App\Models\User;
 class AuthResponseDTO
 {
     public array $user;
+
     public string $token;
 
     public function __construct(User $user, string $token)
