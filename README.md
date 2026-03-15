@@ -20,6 +20,16 @@ A mini Learning Management System built with Laravel, featuring role-based acces
 - **Teacher**: `teacher@example.com` / `password123`
 - **Student**: `student@example.com` / `password123`
 
+## API Documentation (Swagger)
+
+The project includes OpenAPI (Swagger) documentation for all endpoints.
+
+1. Ensure your server is running (`php artisan serve`).
+2. Visit the following URL in your browser:
+   **[http://localhost:8000/api/documentation](http://localhost:8000/api/documentation)**
+
+*Note: If you run the server on a different port (e.g., 8080), update the URL to `http://localhost:8080/api/documentation`.*
+
 ---
 
 ## API Endpoints Testing (cURL)
