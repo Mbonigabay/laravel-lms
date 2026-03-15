@@ -7,17 +7,24 @@ use App\Models\User;
 use App\DTOs\Requests\CreateCourseRequestDTO;
 use App\DTOs\Requests\UpdateCourseRequestDTO;
 use App\DTOs\Responses\CourseResponseDTO;
+use Illuminate\Support\Facades\Cache;
 
 class CourseService
 {
+    private const CACHE_KEY_ALL = 'courses:all';
+    private const CACHE_KEY_PREFIX = 'course:';
+    private const CACHE_TTL = 3600; // 1 hour
+
     /**
      * Get all courses.
      * @return array
      */
     public function getAllCourses(): array
     {
-        $courses = Course::all();
-        return CourseResponseDTO::collection($courses);
+        return Cache::remember(self::CACHE_KEY_ALL, self::CACHE_TTL, function () {
+            $courses = Course::all();
+            return CourseResponseDTO::collection($courses);
+        });
     }
 
     /**
@@ -31,6 +38,9 @@ class CourseService
             'title' => $dto->title,
             'description' => $dto->description,
         ]);
+
+        $this->clearCourseCache();
+
         return new CourseResponseDTO($course);
     }
 
@@ -41,8 +51,10 @@ class CourseService
      */
     public function getCourseById(string $id): CourseResponseDTO
     {
-        $course = Course::findOrFail($id);
-        return new CourseResponseDTO($course);
+        return Cache::remember(self::CACHE_KEY_PREFIX . $id, self::CACHE_TTL, function () use ($id) {
+            $course = Course::findOrFail($id);
+            return new CourseResponseDTO($course);
+        });
     }
 
     /**
@@ -58,6 +70,7 @@ class CourseService
         $updateData = $dto->getUpdateData();
         if (!empty($updateData)) {
             $course->update($updateData);
+            $this->clearCourseCache($id);
         }
 
         return new CourseResponseDTO($course);
@@ -70,6 +83,10 @@ class CourseService
     {
         $course = Course::findOrFail($id);
         $course->delete();
+        
+        $this->clearCourseCache($id);
+        Cache::forget('reports:student_counts');
+
         return true;
     }
 
@@ -85,6 +102,10 @@ class CourseService
         }
 
         $user->enrollments()->create(['course_id' => $course->id]);
+        
+        // Invalidate report cache as student count changed
+        Cache::forget('reports:student_counts');
+
         return true;
     }
 
@@ -103,5 +124,18 @@ class CourseService
     {
         $course = Course::findOrFail($courseId);
         return $course->students;
+    }
+
+    /**
+     * Clear relevant course caches.
+     */
+    private function clearCourseCache(?string $id = null): void
+    {
+        Cache::forget(self::CACHE_KEY_ALL);
+        if ($id) {
+            Cache::forget(self::CACHE_KEY_PREFIX . $id);
+        }
+        // Reports depend on course data/counts
+        Cache::forget('reports:student_counts');
     }
 }

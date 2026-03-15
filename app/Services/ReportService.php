@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Course;
 use App\DTOs\Responses\CourseReportResponseDTO;
+use Illuminate\Support\Facades\Cache;
 
 class ReportService
 {
@@ -13,7 +14,9 @@ class ReportService
      */
     public function getCoursesWithStudentCount(): array
     {
-        $courses = Course::withCount('students')->get();
-        return CourseReportResponseDTO::collection($courses);
+        return Cache::remember('reports:student_counts', 3600, function () {
+            $courses = Course::withCount('students')->get();
+            return CourseReportResponseDTO::collection($courses);
+        });
     }
 }
