@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Ka4ivan\LaravelLogger\Facades\Llog;
 use Symfony\Component\HttpFoundation\Response;
 
 class TraceIdMiddleware
@@ -25,6 +26,13 @@ class TraceIdMiddleware
 
         // Add to log context
         Log::withContext([
+            'trace_id' => $traceId
+        ]);
+
+        // Log request start using Llog for dashboard visibility
+        Llog::info('Request started: ' . $request->method() . ' ' . $request->fullUrl(), [
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
             'trace_id' => $traceId
         ]);
 

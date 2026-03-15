@@ -26,6 +26,12 @@ A mini Learning Management System built with Laravel, featuring role-based acces
    docker-compose exec app php artisan migrate --seed
    ```
 3. Access the API at **[http://localhost:8080](http://localhost:8080)**.
+ 
+## Log Viewer
+
+A web-based log viewer is available to track application activity and model changes.
+- **URL**: `http://localhost:8080/logs`
+- **Features**: View structured logs, filter by level, and track model audit trails (Course, Quiz).
 
 ## Initial Seeded Users
 - **Admin**: `admin@example.com` / `password123`

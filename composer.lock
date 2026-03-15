@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8e38e950f3c901710a2f11552c4f3048",
+    "content-hash": "18d5948429813374ae162dacce3b617a",
     "packages": [
         {
             "name": "brick/math",
@@ -1209,6 +1209,76 @@
                 }
             ],
             "time": "2025-08-22T14:27:06+00:00"
+        },
+        {
+            "name": "ka4ivan/laravel-logger",
+            "version": "3.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ka4ivan/laravel-logger.git",
+                "reference": "b3ca5d3ec7c359cc379239f7ba9fdac8dedd6bdf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ka4ivan/laravel-logger/zipball/b3ca5d3ec7c359cc379239f7ba9fdac8dedd6bdf",
+                "reference": "b3ca5d3ec7c359cc379239f7ba9fdac8dedd6bdf",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^9.0|^10.0|^11.0|^12.0",
+                "php": "^8.0.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Ka4ivan\\LaravelLogger\\ServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/helpers.php"
+                ],
+                "psr-4": {
+                    "Ka4ivan\\LaravelLogger\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kachula Ivan",
+                    "email": "ka4ivan.dev@gmail.com",
+                    "homepage": "https://github.com/ka4ivan",
+                    "role": "Architect & Developer"
+                },
+                {
+                    "name": "Raphaël Huchet",
+                    "homepage": "https://github.com/rap2hpoutre",
+                    "role": "Log Viewer Base"
+                }
+            ],
+            "description": "A Laravel package for advanced logging, providing structured logs, contextual information, and customizable log channels.",
+            "keywords": [
+                "debugging",
+                "error-tracking",
+                "laravel",
+                "log",
+                "log-management",
+                "logger",
+                "logging",
+                "model-changes",
+                "model-tracking",
+                "monitoring"
+            ],
+            "support": {
+                "issues": "https://github.com/ka4ivan/laravel-logger/issues",
+                "source": "https://github.com/ka4ivan/laravel-logger/tree/3.0.1"
+            },
+            "time": "2025-12-17T14:05:05+00:00"
         },
         {
             "name": "laravel/framework",
