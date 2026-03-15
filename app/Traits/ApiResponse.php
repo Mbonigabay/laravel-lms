@@ -14,12 +14,15 @@ trait ApiResponse
      * @param  int  $code
      * @return JsonResponse
      */
-    protected function successResponse($data, string $message = '', int $code = 200): JsonResponse
+    protected function successResponse($data, string $message = null, int $code = 200): JsonResponse
     {
         return response()->json([
             'success' => true,
             'message' => $message,
             'data' => $data,
+            'meta' => [
+                'trace_id' => request()->attributes->get('trace_id'),
+            ],
         ], $code);
     }
 
@@ -37,6 +40,9 @@ trait ApiResponse
             'success' => false,
             'message' => $message,
             'data' => $data,
+            'meta' => [
+                'trace_id' => request()->attributes->get('trace_id'),
+            ],
         ], $code);
     }
 }
